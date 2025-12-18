@@ -1,17 +1,21 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pressable } from 'react-native';
 
 import {
   FocusAwareStatusBar,
+  Input,
+  Modal,
   SafeAreaView,
   ScrollView,
   Text,
+  useModal,
   View,
 } from '@/components/ui';
 import { formatRelativeTime } from '@/lib/utils';
+
+type CompanyType = 'MNC' | 'Global Startup' | 'Indian Startup';
 
 type Job = {
   id: string;
@@ -23,6 +27,7 @@ type Job = {
   created_at: string;
   created_by: string | null;
   isSaved?: boolean;
+  company_type: CompanyType;
 };
 
 const DUMMY_JOBS: Job[] = [
@@ -36,6 +41,7 @@ const DUMMY_JOBS: Job[] = [
     created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     created_by: null,
     isSaved: true,
+    company_type: 'MNC',
   },
   {
     id: '2',
@@ -47,6 +53,7 @@ const DUMMY_JOBS: Job[] = [
     created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
     created_by: 'admin',
     isSaved: false,
+    company_type: 'MNC',
   },
   {
     id: '3',
@@ -58,6 +65,7 @@ const DUMMY_JOBS: Job[] = [
     created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     created_by: null,
     isSaved: true,
+    company_type: 'MNC',
   },
   {
     id: '4',
@@ -69,6 +77,7 @@ const DUMMY_JOBS: Job[] = [
     created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     created_by: 'admin',
     isSaved: false,
+    company_type: 'Global Startup',
   },
   {
     id: '5',
@@ -79,7 +88,8 @@ const DUMMY_JOBS: Job[] = [
     company_id: 'apple-1',
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     created_by: null,
-    isSaved: false,
+    isSaved: true,
+    company_type: 'MNC',
   },
   {
     id: '6',
@@ -91,6 +101,7 @@ const DUMMY_JOBS: Job[] = [
     created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     created_by: 'admin',
     isSaved: false,
+    company_type: 'Indian Startup',
   },
 ];
 
@@ -108,13 +119,11 @@ function JobCard({ job, onSave }: JobCardProps) {
   const getCardTheme = () => {
     if (job.segment.includes('<1')) {
       return {
-        border: 'border-secondary-500 bg-secondary-50',
         text: 'text-blue-700 dark:text-blue-300',
       };
     }
     if (job.segment.includes('1-3') || job.segment.includes('1-2')) {
       return {
-        border: 'border-emerald-500 bg-emerald-50',
         text: 'text-emerald-700 dark:text-emerald-300',
       };
     }
@@ -124,53 +133,71 @@ function JobCard({ job, onSave }: JobCardProps) {
       job.segment.includes('2-4')
     ) {
       return {
-        border: 'border-purple-500 bg-purple-50',
         text: 'text-purple-700 dark:text-purple-300',
       };
     }
     return {
-      border: 'border-amber-500 bg-amber-50',
       text: 'text-amber-700 dark:text-amber-300',
     };
   };
 
+  const getTagStyle = (type: CompanyType) => {
+    switch (type) {
+      case 'MNC':
+        return { bg: 'bg-green-100', text: 'text-black' };
+      case 'Global Startup':
+        return { bg: 'bg-pink-100', text: 'text-black' };
+      case 'Indian Startup':
+        return { bg: 'bg-amber-100', text: 'text-black' };
+      default:
+        return { bg: 'bg-gray-100', text: 'text-black' };
+    }
+  };
+
   const theme = getCardTheme();
+  const tagStyle = getTagStyle(job.company_type);
 
   return (
-    <View
-      className={`mb-4 rounded-xl border-l-4 ${theme.border} bg-white dark:bg-neutral-900 p-5 shadow-sm`}
-    >
-      <View className="flex-row items-center justify-between mb-3">
+    <View className="mb-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <View className="mb-3 flex-row items-center justify-between">
         <View className="flex-1">
-          <Text
-            className={`text-xs font-bold uppercase tracking-wider ${theme.text} mb-0.5`}
-          >
-            {job.company}
-          </Text>
-          <Text className="text-lg font-bold text-neutral-900 dark:text-white leading-tight">
+          <View className="mb-1 flex-row items-center gap-2">
+            <Text
+              className={`text-sm font-bold uppercase tracking-wider ${theme.text}`}
+            >
+              {job.company}
+            </Text>
+            <View className={`rounded-md px-2 py-0.5 ${tagStyle.bg}`}>
+              <Text className={`text-[10px] font-medium ${tagStyle.text}`}>
+                {job.company_type}
+              </Text>
+            </View>
+          </View>
+
+          <Text className="text-lg font-bold leading-tight text-neutral-900">
             {job.title}
           </Text>
         </View>
       </View>
 
-      <Text className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 font-medium">
+      <Text className="mb-4 text-sm font-medium text-neutral-600">
         {job.segment}
       </Text>
 
-      <View className="flex-row items-center justify-between border-t border-neutral-200/50 dark:border-neutral-700 pt-4">
-        <Text className="text-[10px] font-bold text-neutral-400 uppercase tracking-tighter">
+      <View className="flex-row items-center justify-between border-t border-neutral-200/50 pt-4">
+        <Text className="text-[10px] font-bold uppercase tracking-tighter text-neutral-400">
           Posted : {formatRelativeTime(job.created_at)}
         </Text>
         <View className="flex-row items-center gap-7">
-          <Pressable onPress={onSave} hitSlop={12}>
+          <Pressable hitSlop={12} onPress={onSave}>
             <Ionicons
               name={job.isSaved ? 'star' : 'star-outline'}
               size={20}
-              color="#3b82f6"
+              color={job.isSaved ? '#FFD700' : '#000000'}
             />
           </Pressable>
-          <Pressable onPress={handleOpenLink} hitSlop={12}>
-            <Ionicons name="paper-plane-outline" size={20} color="#3b82f6" />
+          <Pressable hitSlop={12} onPress={handleOpenLink}>
+            <Ionicons name="paper-plane-outline" size={20} color="#000000" />
           </Pressable>
         </View>
       </View>
@@ -179,38 +206,57 @@ function JobCard({ job, onSave }: JobCardProps) {
 }
 
 export default function Jobs() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const { ref, present, dismiss } = useModal();
+
   const handleSaveJob = useCallback((jobId: string) => {
     // TODO: Implement save job functionality
     console.log('Save job:', jobId);
   }, []);
 
+  const handleFilterPress = useCallback(() => {
+    present();
+  }, [present]);
+
+  const filteredJobs = DUMMY_JOBS.filter((job) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      job.title.toLowerCase().includes(query) ||
+      job.company.toLowerCase().includes(query)
+    );
+  });
+
   return (
-    <SafeAreaView
-      className="flex-1 bg-white dark:bg-neutral-950"
-      edges={['top']}
-    >
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <FocusAwareStatusBar />
-      <View className="flex-1 px-5 pt-6 ">
-        <View className="mb-6 flex-row items-center justify-between">
-          <View className="flex-1 mr-4">
-            <Text className="text-3xl font-black text-neutral-900 dark:text-white">
-              Explore Jobs
-            </Text>
-            <Text className="text-base font-medium text-neutral-500">
-              Jobs are based on the segment you have choosen for you.
-            </Text>
-          </View>
-          <View className="rounded-2xl  p-2 ">
-            <Image
-              source="https://cdn-icons-png.flaticon.com/512/5537/5537993.png"
-              style={{ width: 32, height: 32 }}
-              contentFit="contain"
-            />
+      <View className="flex-1 px-5 pt-6">
+        <View className="mb-4">
+          <Text className="text-3xl font-black text-neutral-900">
+            Explore Jobs
+          </Text>
+          <Text className="mb-4 text-base font-medium text-neutral-500">
+            Jobs are based on the segment you have choosen for you.
+          </Text>
+
+          <View className="flex-row items-center gap-2">
+            <View className="flex-1">
+              <Input
+                placeholder="Search jobs..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+            <Pressable
+              onPress={handleFilterPress}
+              className="mb-2 size-12 items-center justify-center rounded-xl border border-neutral-300 bg-neutral-100"
+            >
+              <Ionicons name="options-outline" size={24} color="black" />
+            </Pressable>
           </View>
         </View>
 
-        <ScrollView className="flex-1 " showsVerticalScrollIndicator={false}>
-          {DUMMY_JOBS.map((job) => (
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+          {filteredJobs.map((job) => (
             <JobCard
               key={job.id}
               job={job}
@@ -219,6 +265,19 @@ export default function Jobs() {
           ))}
         </ScrollView>
       </View>
+
+      <Modal
+        ref={ref}
+        snapPoints={['50%']}
+        title="Filter Jobs"
+        onDismiss={dismiss}
+      >
+        <View className="flex-1 px-4 py-2">
+          <Text className="text-base text-neutral-600">
+            Filters will appear here.
+          </Text>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
