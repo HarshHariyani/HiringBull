@@ -57,7 +57,7 @@ function RootNavigator() {
   //   temporary flags for testing
   const isFirstTime = false;
   const isAuthenticated = true;
-  const hasCompletedOnboarding = true;
+  const hasCompletedOnboarding = false;
   const isSubscribed = true;
 
   // Hide splash once we have initial state

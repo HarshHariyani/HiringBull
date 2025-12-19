@@ -29,10 +29,17 @@ export const useSelectedTheme = () => {
   return { selectedTheme, setSelectedTheme } as const;
 };
 // to be used in the root file to load the selected theme from MMKV
+// Set to true to enable dark mode support
+const DARK_MODE_ENABLED = false;
+
 export const loadSelectedTheme = () => {
+  if (!DARK_MODE_ENABLED) {
+    colorScheme.set('light');
+    return;
+  }
+
   const theme = storage.getString(SELECTED_THEME);
   if (theme !== undefined) {
-    console.log('theme', theme);
     colorScheme.set(theme as ColorSchemeType);
   }
 };
