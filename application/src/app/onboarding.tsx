@@ -143,8 +143,8 @@ function OptionCard({ selected, onPress, children }: OptionCardProps) {
       onPress={onPress}
       className={`mb-3 flex-row items-center rounded-xl border bg-white p-5 ${
         selected
-          ? 'border-2 border-black shadow-lg'
-          : 'border-neutral-200 shadow-md dark:border-neutral-700'
+          ? 'border-2 border-black android:shadow-lg ios:shadow-sm'
+          : 'border-neutral-200 android:shadow-md ios:shadow-sm dark:border-neutral-700'
       }`}
     >
       <View className="flex-1">{children}</View>
@@ -178,10 +178,10 @@ function ExperienceCard({
   return (
     <Pressable
       onPress={onPress}
-      className={`mb-3 flex-row items-center overflow-hidden rounded-2xl border bg-white p-3 shadow-md dark:bg-neutral-800 ${
+      className={`mb-3 flex-row items-center overflow-hidden rounded-2xl border bg-white p-3 dark:bg-neutral-800 ${
         selected
-          ? 'border-2 border-black dark:border-white'
-          : 'border-neutral-200 dark:border-neutral-700'
+          ? 'border-2 border-black android:shadow-md ios:shadow-sm dark:border-white'
+          : 'border-neutral-200 android:shadow-md ios:shadow-sm dark:border-neutral-700'
       }`}
     >
       <Image source={image} className="size-14 rounded-xl" contentFit="cover" />
@@ -316,7 +316,7 @@ function Step2({
             <Pressable
               key={filter.value}
               onPress={() => setActiveFilter(filter.value)}
-              className={`mr-2 rounded-full border px-4 py-2 ${
+              className={`mr-2 rounded-full border px-4 py-2  ${
                 activeFilter === filter.value
                   ? 'border-black bg-black dark:border-white dark:bg-white'
                   : 'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800'

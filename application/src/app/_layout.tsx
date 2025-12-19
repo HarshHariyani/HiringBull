@@ -58,7 +58,7 @@ function RootNavigator() {
   const isFirstTime = false;
   const isAuthenticated = true;
   const hasCompletedOnboarding = false;
-  const isSubscribed = false;
+  const isSubscribed = true;
 
   // Hide splash once we have initial state
   useEffect(() => {

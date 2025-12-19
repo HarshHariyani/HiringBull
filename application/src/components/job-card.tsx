@@ -74,7 +74,7 @@ export function JobCard({ job, onSave }: JobCardProps) {
   const tagStyle = getTagStyle(job.company_type);
 
   return (
-    <View className="mb-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-md">
+    <View className="mb-4 rounded-xl border border-neutral-200 bg-white p-5 android:shadow-md ios:shadow-sm">
       <View className="mb-3 flex-row items-center justify-between">
         <View className="flex-1">
           <View className="mb-1 flex-row items-center gap-2">

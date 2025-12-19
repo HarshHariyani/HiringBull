@@ -71,7 +71,7 @@ function SocialPostCard({ post }: { post: SocialPost }) {
   }, [post.source_link]);
 
   return (
-    <View className="mb-4 rounded-xl border border-neutral-200 bg-white shadow-md">
+    <View className="mb-4 rounded-xl border border-neutral-200 bg-white android:shadow-md ios:shadow-sm">
       <View className="relative overflow-hidden p-5">
         {/* Decorative Quote Icon */}
         <View className="absolute -right-4 -top-4 opacity-5">

@@ -24,7 +24,7 @@ const COMPANIES: Company[] = [
 
 function DiscussionCard({ name }: { name: string }) {
   return (
-    <Pressable className="mb-4 flex-row items-center justify-between rounded-xl border border-neutral-200 bg-white p-5 shadow-md">
+    <Pressable className="mb-4 flex-row items-center justify-between rounded-xl border border-neutral-200 bg-white p-5 android:shadow-md ios:shadow-sm">
       <View>
         <Text className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
           Company
