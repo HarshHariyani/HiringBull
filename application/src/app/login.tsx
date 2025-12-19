@@ -3,7 +3,7 @@ import React from 'react';
 
 import type { LoginFormProps } from '@/components/login-form';
 import { LoginForm } from '@/components/login-form';
-import { FocusAwareStatusBar } from '@/components/ui';
+import { FocusAwareStatusBar, SafeAreaView, View } from '@/components/ui';
 import { useAuth } from '@/lib';
 
 export default function Login() {
@@ -16,9 +16,11 @@ export default function Login() {
     router.replace('/');
   };
   return (
-    <>
+    <View className="flex-1 bg-white dark:bg-neutral-950">
       <FocusAwareStatusBar />
-      <LoginForm onSubmit={onSubmit} />
-    </>
+      <SafeAreaView className="flex-1">
+        <LoginForm onSubmit={onSubmit} />
+      </SafeAreaView>
+    </View>
   );
 }
