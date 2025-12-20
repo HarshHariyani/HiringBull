@@ -48,17 +48,17 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  //   const [isFirstTime] = useIsFirstTime();
-  //   const hasCompletedOnboarding = useOnboarding.use.hasCompletedOnboarding();
-  //   const isSubscribed = useOnboarding.use.isSubscribed();
-  //   const status = useAuth.use.status();
-  //   const isAuthenticated = status === 'signIn';
+    const [isFirstTime] = useIsFirstTime();
+    const hasCompletedOnboarding = useOnboarding.use.hasCompletedOnboarding();
+    const isSubscribed = useOnboarding.use.isSubscribed();
+    const status = useAuth.use.status();
+    const isAuthenticated = status === 'signIn';
 
   //   temporary flags for testing
-  const isFirstTime = false;
-  const isAuthenticated = false;
-  const hasCompletedOnboarding = false;
-  const isSubscribed = true;
+//   const isFirstTime = false;
+//   const isAuthenticated = true;
+//   const hasCompletedOnboarding = true;
+//   const isSubscribed = true;
 
   // Hide splash once we have initial state
   useEffect(() => {

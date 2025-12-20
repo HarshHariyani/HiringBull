@@ -121,14 +121,16 @@ export default function Profile() {
           </View>
 
           {/* Referral/Info Card */}
-          <View className="mb-8 overflow-hidden rounded-xl bg-neutral-900 p-6 shadow-md dark:bg-neutral-800">
-            <View className="mb-4 size-12 items-center justify-center rounded-full bg-white/20">
+          <View className="mb-8 flex-row items-center gap-4 overflow-hidden rounded-xl bg-neutral-900 p-5 shadow-md dark:bg-neutral-800">
+            <View className="size-12 shrink-0 items-center justify-center rounded-full bg-white/20">
               <Ionicons name="gift-outline" size={24} color="white" />
             </View>
-            <Text className="text-lg font-bold leading-7 text-white">
-              Hope you are enjoying our product, share it with your friends and
-              get referral bonus of 100.
-            </Text>
+            <View className="flex-1">
+              <Text className="text-base font-bold leading-6 text-white">
+                Hope you are enjoying our product, share it with your friends and
+                get referral bonus of 100.
+              </Text>
+            </View>
           </View>
 
           {/* Settings List */}
