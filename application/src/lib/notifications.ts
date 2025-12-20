@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { router } from 'expo-router';
 
 // Configure how notifications are handled when app is in foreground
 Notifications.setNotificationHandler({
@@ -36,8 +37,22 @@ export function useNotifications() {
     // Listener for when user taps on a notification
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log('Notification response:', response);
-        // Handle navigation or other actions here based on notification data
+        console.log('Notification tapped:', response);
+
+        // Get the data from the notification
+        const data = response.notification.request.content.data;
+
+        // Navigate based on the 'screen' field in notification data
+        // Example: send notification with data: { screen: 'saved' }
+        if (data?.screen) {
+          const screen = data.screen as string;
+          console.log('Navigating to:', screen);
+
+          // Add a small delay to ensure app is fully initialized (especially for killed state)
+          setTimeout(() => {
+            router.push(`/(app)/${screen}` as any);
+          }, 100);
+        }
       });
 
     return () => {
