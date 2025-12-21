@@ -57,7 +57,33 @@ function NotificationInitializer() {
   const { expoPushToken } = useNotifications();
   useNotificationObserver();
 
-  console.log('Push Token:', expoPushToken);
+  // Send push token to backend when available
+  useEffect(() => {
+    if (expoPushToken) {
+      console.log('Push Token:', expoPushToken);
+
+      // TODO: Replace with actual API endpoint
+      const API_URL = 'https://your-api.example.com/api/push-token';
+
+      fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: expoPushToken,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Push token registered:', data);
+        })
+        .catch((error) => {
+          console.error('Failed to register push token:', error);
+        });
+    }
+  }, [expoPushToken]);
+
   return null;
 }
 
