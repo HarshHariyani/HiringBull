@@ -1,9 +1,18 @@
+import httpStatus from 'http-status';
+
 export const notFoundHandler = (req, res, next) => {
-  res.status(404).json({ error: "Not Found" });
+  res.status(httpStatus.NOT_FOUND).json({ code: httpStatus.NOT_FOUND, message: "Not Found" });
 };
 
 export const errorHandler = (err, req, res, next) => {
   console.error(err);
-  const status = err.status || 500;
-  res.status(status).json({ error: err.message || "Internal Server Error" });
+  const statusCode = err.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+  const message = err.message || httpStatus[statusCode];
+
+  res.status(statusCode).json({
+    code: statusCode,
+    message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
 };
+
