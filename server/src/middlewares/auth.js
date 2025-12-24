@@ -1,4 +1,5 @@
 import { clerkMiddleware, requireAuth as clerkRequireAuth, getAuth } from '@clerk/express';
+import prisma from '../prismaClient.js';
 
 /**
  * Initialize Clerk middleware for the Express app
@@ -58,12 +59,48 @@ export const requireApiKey = (req, res, next) => {
     next();
 };
 
-/**
- * Helper to get Clerk user ID from request
- * @param {Request} req - Express request object
- * @returns {string|null} - Clerk user ID or null
- */
 export const getClerkUserId = (req) => {
     const auth = getAuth(req);
     return auth?.userId || req.clerkUserId || null;
+};
+
+/**
+ * Middleware to require active payment/subscription
+ * Must be used AFTER requireAuth or requireApiKey (if mixed)
+ * Assuming requireAuth has already run and populated auth context
+ */
+export const requirePayment = async (req, res, next) => {
+    try {
+        const clerkId = getClerkUserId(req);
+
+        if (!clerkId) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
+
+        // Check if user exists and is paid
+        const user = await prisma.user.findUnique({
+            where: { clerkId: clerkId }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const now = new Date();
+        const isActive = user.isPaid && (!user.planExpiry || user.planExpiry > now);
+
+        if (!isActive) {
+            return res.status(403).json({
+                message: "Active subscription required",
+                code: "PAYMENT_REQUIRED"
+            });
+        }
+
+        // Attach user object to req for convenience
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error("Payment check error:", error);
+        res.status(500).json({ message: "Internal server error during payment check" });
+    }
 };

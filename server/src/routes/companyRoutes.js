@@ -1,13 +1,13 @@
 import express from 'express';
 import validate from '../middlewares/validate.js';
 import * as companyValidation from '../validations/companyValidation.js';
-import { requireApiKey } from '../middlewares/auth.js';
+import { requireApiKey, requireAuth, requirePayment } from '../middlewares/auth.js';
 import { getAllCompanies, createCompany, bulkCreateCompanies } from '../controllers/companyController.js';
 
 const router = express.Router();
 
-// Public routes
-router.get('/', validate(companyValidation.getCompanies), getAllCompanies);
+// Protected routes (require valid subscription)
+router.get('/', requireAuth, requirePayment, validate(companyValidation.getCompanies), getAllCompanies);
 
 // Internal routes (API key protected)
 router.post('/', requireApiKey, validate(companyValidation.createCompany), createCompany);
