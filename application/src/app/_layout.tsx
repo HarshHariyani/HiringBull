@@ -91,7 +91,8 @@ function RootNavigator() {
     const [isFirstTime] = useIsFirstTime();
   const { isSignedIn, isLoaded } = useAuth()
     const hasCompletedOnboarding = useOnboarding.use.hasCompletedOnboarding();
-    const isSubscribed = useOnboarding.use.isSubscribed();
+    // const isSubscribed = useOnboarding.use.isSubscribed();
+    const isSubscribed = false;
 
     // Wait for Clerk to load before determining auth state
     const isAuthenticated = isLoaded ? (isSignedIn ?? false) : false;
