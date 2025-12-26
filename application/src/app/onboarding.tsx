@@ -524,7 +524,10 @@ function Step2({
             </Text>
             <Checkbox
               checked={allFilteredSelected}
-              onChange={() => {}}
+              onChange={() => {
+                const ids = filteredCompanies.map((c) => c.id);
+                onSelectAll(ids, !allFilteredSelected);
+              }}
               accessibilityLabel="Select all visible companies"
             />
           </Pressable>
@@ -548,7 +551,9 @@ function Step2({
               onPress={() => onToggle(company.id)}
             >
               <View className="flex-row items-center">
-                <Text className="mr-3 text-2xl">{company.emoji}</Text>
+                <View className="mr-3 size-10 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
+                  <Ionicons name="business" size={20} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+                </View>
                 <Text className="text-lg font-semibold">{company.name}</Text>
               </View>
             </OptionCard>
