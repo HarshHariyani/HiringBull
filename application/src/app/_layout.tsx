@@ -14,10 +14,11 @@ import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-expo'
 import { tokenCache } from '@clerk/clerk-expo/token-cache'
 
 import { APIProvider } from '@/api';
+import { useRegisterDevice } from '@/features/users';
+import { authService } from '@/service/auth-service';
 import {
   hydrateOnboarding,
   loadSelectedTheme,
-  resetOnboarding,
   useIsFirstTime,
   useNotificationObserver,
   useNotifications,
@@ -55,65 +56,35 @@ export default function RootLayout() {
  */
 function NotificationInitializer() {
   const { expoPushToken } = useNotifications();
-  const { getToken } = useAuth();
+  const { mutate: registerDevice } = useRegisterDevice();
   useNotificationObserver();
 
   // Send push token to backend when available
   useEffect(() => {
-    async function registerDeviceToken() {
-      if (!expoPushToken) return;
-
+    if (expoPushToken) {
       console.log('Push Token:', expoPushToken);
-
-      try {
-        // Get the JWT token from Clerk for authentication
-        const authToken = await getToken();
-
-        if (!authToken) {
-          console.error('No authentication token available for device registration');
-          return;
-        }
-
-        const API_URL = 'https://e09f70749ed9.ngrok-free.app/api/users/devices';
-        const deviceType = Platform.OS === 'ios' ? 'ios' : 'android';
-
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`,
-          },
-          body: JSON.stringify({
-            token: expoPushToken,
-            type: deviceType,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || `API error: ${response.status}`);
-        }
-
-        console.log('Push token registered:', data);
-      } catch (error) {
-        console.error('Failed to register push token:', error);
-      }
+      const deviceType = Platform.OS === 'ios' ? 'ios' : 'android';
+      registerDevice({ token: expoPushToken, type: deviceType });
     }
-
-    registerDeviceToken();
-  }, [expoPushToken, getToken]);
+  }, [expoPushToken, registerDevice]);
 
   return null;
 }
 
 function RootNavigator() {
     const [isFirstTime] = useIsFirstTime();
-  const { isSignedIn, isLoaded } = useAuth()
+    const { isSignedIn, isLoaded, getToken } = useAuth();
     const hasCompletedOnboarding = useOnboarding.use.hasCompletedOnboarding();
-    // const hasCompletedOnboarding = false;
     const isSubscribed = useOnboarding.use.isSubscribed();
-    // const isSubscribed = false;
+
+    // Sync auth service with Clerk
+    useEffect(() => {
+      if (isSignedIn) {
+        authService.setGetTokenFunction(getToken);
+      } else {
+        authService.clearAuth();
+      }
+    }, [isSignedIn, getToken]);
 
     // Wait for Clerk to load before determining auth state
     const isAuthenticated = isLoaded ? (isSignedIn ?? false) : false;
