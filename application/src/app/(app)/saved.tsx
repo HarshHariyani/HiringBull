@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import React, { useCallback } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, Image } from 'react-native';
 
 import {
   FocusAwareStatusBar,
@@ -32,7 +32,8 @@ const DUMMY_POSTS: SocialPost[] = [
       'Hi everyone my team is hiring for SDE 2 roles, if your profile fits well please mail me at nayak.primary@gmail.com. Looking for strong problem solvers with React Native experience.',
     segment: 'Engineering',
     source_link: 'https://www.linkedin.com/in/kabeer-joshi-7173061aa/',
-    image_link: null,
+    image_link:
+      'https://images.fonearena.com/blog/wp-content/uploads/2022/08/Samsung-Research-AI-Center.png',
     created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     created_by: null,
     source_name: 'LinkedIn',
@@ -102,20 +103,54 @@ function SocialPostCard({ post }: { post: SocialPost }) {
           {post.description}
         </Text>
 
-        {post.source_link && (
+        {post.image_link && (
+          <Image
+            source={{ uri: post.image_link }}
+            resizeMode="cover"
+            style={{
+              width: '100%',
+              height: undefined, // auto height
+              aspectRatio: 16 / 9, // stable layout
+              borderRadius: 20,
+              marginBottom: 16,
+            }}
+          />
+        )}
+
+        <View className="mt-2 flex-row items-center gap-2">
+          {/* AI Summarized */}
           <Pressable
             onPress={handleOpenSource}
-            className="flex-row items-center self-start gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 active:opacity-70 dark:border-blue-900/30 dark:bg-blue-900/20"
+            className="flex-row items-center gap-2 rounded-full border border-blue-100 px-4 py-2 active:opacity-70 dark:border-blue-900/30 dark:bg-blue-900/20"
           >
-            <Ionicons name="link" size={14} color="#3b82f6" />
+            <Image
+              source={{
+                uri: 'https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Gemini_SparkIcon_.width-500.format-webp.webp',
+              }}
+              style={{ width: 14, height: 14 }}
+              resizeMode="contain"
+            />
             <Text className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-              Source
-            </Text>
-            <Text className="text-xs font-bold text-blue-600 dark:text-blue-400">
-              {post.source_name}
+              AI Summarized
             </Text>
           </Pressable>
-        )}
+
+          {/* Source */}
+          {post.source_link && (
+            <Pressable
+              onPress={handleOpenSource}
+              className="flex-row items-center gap-2 rounded-full border border-blue-100 px-4 py-2 active:opacity-70 dark:border-blue-900/30 dark:bg-blue-900/20"
+            >
+              <Ionicons name="link" size={14} />
+              <Text className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                Source
+              </Text>
+              <Text className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                {post.source_name}
+              </Text>
+            </Pressable>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -134,10 +169,67 @@ export default function SocialPosts() {
             <Text className="text-3xl font-black text-neutral-900 dark:text-white">
               Social posts
             </Text>
-            <Text className="mt-2 text-base font-medium leading-6 text-neutral-500">
-              Discover referral opportunities posted directly by employees or
-              curated from professional networks like LinkedIn and Twitter.
+            <Text className="mb-4 text-base font-medium text-neutral-500">
+              We surface{' '}
+              <Text className="font-semibold text-neutral-700">
+                hiring posts that usually get buried in feeds
+              </Text>
+              , including updates shared by{' '}
+              <Text className="font-semibold text-neutral-700">
+                employees, founders of YC-backed companies and HR
+              </Text>
+              . You’ll also see{' '}
+              <Text className="font-semibold text-neutral-700">
+                posts asking candidates to fill hiring interest forms
+              </Text>
+              , all curated in one place so you can{' '}
+              <Text className="font-semibold text-neutral-700">
+                respond faster and with context
+              </Text>
+              .
             </Text>
+            <Pressable
+              onPress={() => {
+                Linking.openURL('https://github.com/NayakPenguin/HiringBull');
+              }}
+              className="mb-4 self-start flex-row items-center rounded-full border border-neutral-300"
+              style={{
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+                backgroundColor: '#fff',
+              }}
+            >
+              <View className="flex-row items-center gap-2">
+                <Image
+                  source={{
+                    uri: 'https://icones.pro/wp-content/uploads/2021/06/icone-github-noir.png',
+                  }}
+                  style={{ width: 22, height: 22 }}
+                  resizeMode="contain"
+                />
+
+                <Text
+                  style={{
+                    fontSize: 11, // ~0.8rem
+                    color: 'rgb(19, 128, 59)',
+                    fontWeight: '100',
+                  }}
+                >
+                  Contribute to our open-source code on GitHub
+                </Text>
+
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: 'rgb(19, 128, 59)',
+                    fontWeight: '100',
+                    marginLeft: -6,
+                  }}
+                >
+                  ↗
+                </Text>
+              </View>
+            </Pressable>
           </View>
         </View>
 
@@ -150,6 +242,44 @@ export default function SocialPosts() {
             paddingTop: 10,
           }}
         >
+          <View className="mb-3 flex-row gap-2">
+            <Pressable
+              className="self-start items-center justify-center rounded-xl border border-neutral-200 bg-white android:shadow-md ios:shadow-sm"
+              style={{
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 11,
+                  color: 'rgb(19, 128, 59)',
+                  fontWeight: '400',
+                }}
+              >
+                All Companies
+              </Text>
+            </Pressable>
+
+            <Pressable
+              className="self-start items-center justify-center rounded-xl border border-neutral-200 bg-white android:shadow-md ios:shadow-sm"
+              style={{
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 11,
+                  color: 'rgb(19, 128, 59)',
+                  fontWeight: '400',
+                }}
+              >
+                All Levels
+              </Text>
+            </Pressable>
+          </View>
+
           {DUMMY_POSTS.map((post) => (
             <SocialPostCard key={post.id} post={post} />
           ))}

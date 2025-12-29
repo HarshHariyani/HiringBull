@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Image } from 'react-native';
 
 import {
   FocusAwareStatusBar,
@@ -83,13 +83,16 @@ export default function Profile() {
       console.log('Making API call with token...');
 
       // Make the API call
-      const response = await fetch('http://localhost:4000/api/public/auth-test', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        'http://localhost:4000/api/public/auth-test',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       const data = await response.json();
 
@@ -108,27 +111,23 @@ export default function Profile() {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Reset onboarding state on logout
-              resetOnboarding();
-              // Sign out from Clerk
-              await signOut();
-            } catch (error) {
-              console.error('Logout error:', error);
-            }
-          },
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            // Reset onboarding state on logout
+            resetOnboarding();
+            // Sign out from Clerk
+            await signOut();
+          } catch (error) {
+            console.error('Logout error:', error);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const SETTINGS: SettingsItem[] = [
@@ -174,9 +173,51 @@ export default function Profile() {
           <Text className="text-3xl font-black text-neutral-900 dark:text-white">
             Profile
           </Text>
-          <Text className="mt-2 text-base font-medium leading-6 text-neutral-500">
-            Manage your account settings and preferences.
+          <Text className="mb-4 text-base font-medium text-neutral-500">
+            Manage your account and preferences. We’re here to help you get the most out of your job search. ❤️
           </Text>
+          <Pressable
+            onPress={() => {
+              Linking.openURL('https://github.com/NayakPenguin/HiringBull');
+            }}
+            className="mb-4 self-start flex-row items-center rounded-full border border-neutral-300"
+            style={{
+              paddingVertical: 5,
+              paddingHorizontal: 10,
+              backgroundColor: '#fff',
+            }}
+          >
+            <View className="flex-row items-center gap-2">
+              <Image
+                source={{
+                  uri: 'https://icones.pro/wp-content/uploads/2021/06/icone-github-noir.png',
+                }}
+                style={{ width: 22, height: 22 }}
+                resizeMode="contain"
+              />
+
+              <Text
+                style={{
+                  fontSize: 11, // ~0.8rem
+                  color: 'rgb(19, 128, 59)',
+                  fontWeight: '100',
+                }}
+              >
+                Contribute to our open-source code on GitHub
+              </Text>
+
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: 'rgb(19, 128, 59)',
+                  fontWeight: '100',
+                  marginLeft: -6,
+                }}
+              >
+                ↗
+              </Text>
+            </View>
+          </Pressable>
         </View>
 
         <ScrollView
@@ -207,7 +248,7 @@ export default function Profile() {
           </View>
 
           {/* API Test Card */}
-          <View className="mb-6 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+          {/* <View className="mb-6 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-lg font-bold text-neutral-900 dark:text-white">
                 API Test
@@ -264,7 +305,7 @@ export default function Profile() {
                 </Text>
               </View>
             )}
-          </View>
+          </View> */}
 
           {/* Referral/Info Card */}
           <View className="mb-8 flex-row items-center gap-4 overflow-hidden rounded-xl bg-neutral-900 p-5 shadow-md dark:bg-neutral-800">
@@ -273,8 +314,8 @@ export default function Profile() {
             </View>
             <View className="flex-1">
               <Text className="text-base font-bold leading-6 text-white">
-                Hope you are enjoying our product, share it with your friends and
-                get referral bonus of 100.
+                Enjoying the product? Share it with friends and earn a flat ₹100
+                referral bonus when they sign up using your email.
               </Text>
             </View>
           </View>

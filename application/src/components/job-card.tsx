@@ -40,7 +40,7 @@ export function JobCard({ job, onSave }: JobCardProps) {
     }
     if (job.segment.includes('1-3') || job.segment.includes('1-2')) {
       return {
-        text: 'text-emerald-700 dark:text-emerald-300',
+        text: 'text-blue-700 dark:text-blue-300',
       };
     }
     if (
@@ -49,11 +49,11 @@ export function JobCard({ job, onSave }: JobCardProps) {
       job.segment.includes('2-4')
     ) {
       return {
-        text: 'text-purple-700 dark:text-purple-300',
+        text: 'text-blue-700 dark:text-blue-300',
       };
     }
     return {
-      text: 'text-amber-700 dark:text-amber-300',
+      text: 'text-blue-700 dark:text-blue-300',
     };
   };
 
@@ -105,13 +105,13 @@ export function JobCard({ job, onSave }: JobCardProps) {
           Posted : {formatRelativeTime(job.created_at)}
         </Text>
         <View className="flex-row items-center gap-7">
-          <Pressable hitSlop={12} onPress={onSave}>
+          {/* <Pressable hitSlop={12} onPress={onSave}>
             <Ionicons
               name={job.isSaved ? 'star' : 'star-outline'}
               size={20}
               color={job.isSaved ? '#FFD700' : '#000000'}
             />
-          </Pressable>
+          </Pressable> */}
           <Pressable hitSlop={12} onPress={handleOpenLink}>
             <Ionicons name="paper-plane-outline" size={20} color="#000000" />
           </Pressable>

@@ -2,6 +2,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import React from 'react';
+import { View } from 'react-native';
 
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
@@ -50,11 +51,21 @@ export default function TabLayout() {
         name="saved"
         options={{
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="format-quote-close"
-              size={40}
-              color={color}
-            />
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <MaterialCommunityIcons
+                name="format-quote-close"
+                size={24}
+                color={color}
+                style={{ transform: [{ scale: 1.65 }], marginTop: -1 }}
+              />
+            </View>
           ),
         }}
       />

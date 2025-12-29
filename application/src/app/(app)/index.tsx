@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useState } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, Image, Linking } from 'react-native';
 
 import { type Job, JobCard } from '@/components/job-card';
 import {
@@ -119,8 +119,59 @@ export default function Jobs() {
             Explore Jobs
           </Text>
           <Text className="mb-4 text-base font-medium text-neutral-500">
-            Jobs are based on the segment you have choosen for you.
+            We curate jobs based on your experience and the companies you care
+            about,
+            <Text className="font-semibold text-neutral-700">
+              notify you within 10 minutes of an opening{' '}
+            </Text>
+            so you can apply early. Our goal is simple,{' '}
+            <Text className="font-semibold text-neutral-700">
+              help you get seen before the crowd{' '}
+            </Text> without noise or spam.
           </Text>
+
+          <Pressable
+            onPress={() => {
+              Linking.openURL('https://github.com/NayakPenguin/HiringBull');
+            }}
+            className="mb-4 self-start flex-row items-center rounded-full border border-neutral-300"
+            style={{
+              paddingVertical: 5,
+              paddingHorizontal: 10,
+              backgroundColor: '#fff',
+            }}
+          >
+            <View className="flex-row items-center gap-2">
+              <Image
+                source={{
+                  uri: 'https://icones.pro/wp-content/uploads/2021/06/icone-github-noir.png',
+                }}
+                style={{ width: 22, height: 22 }}
+                resizeMode="contain"
+              />
+
+              <Text
+                style={{
+                  fontSize: 11, // ~0.8rem
+                  color: 'rgb(19, 128, 59)',
+                  fontWeight: '100',
+                }}
+              >
+                Contribute to our open-source code on GitHub
+              </Text>
+
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: 'rgb(19, 128, 59)',
+                  fontWeight: '100',
+                  marginLeft: -6,
+                }}
+              >
+                ↗
+              </Text>
+            </View>
+          </Pressable>
 
           <View className="flex-row items-center gap-2">
             <View className="flex-1">
@@ -130,11 +181,15 @@ export default function Jobs() {
                 onChangeText={setSearchQuery}
               />
             </View>
-            <Pressable
+            {/* <Pressable
               onPress={handleFilterPress}
               className="mb-2 size-12 items-center justify-center rounded-xl border border-neutral-300 bg-neutral-100"
             >
               <Ionicons name="options-outline" size={24} color="black" />
+            </Pressable> */}
+
+            <Pressable className="mb-2 size-12 items-center justify-center rounded-xl border border-neutral-300 bg-neutral-100">
+              <Ionicons name="search-outline" size={24} color="black" />
             </Pressable>
           </View>
         </View>
@@ -148,6 +203,44 @@ export default function Jobs() {
             paddingTop: 10,
           }}
         >
+          <View className="mb-3 flex-row gap-2">
+            <Pressable
+              className="self-start items-center justify-center rounded-xl border border-neutral-200 bg-white android:shadow-md ios:shadow-sm"
+              style={{
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 11,
+                  color: 'rgb(19, 128, 59)',
+                  fontWeight: '400',
+                }}
+              >
+                42 Companies Selected
+              </Text>
+            </Pressable>
+
+            <Pressable
+              className="self-start items-center justify-center rounded-xl border border-neutral-200 bg-white android:shadow-md ios:shadow-sm"
+              style={{
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 11,
+                  color: 'rgb(19, 128, 59)',
+                  fontWeight: '400',
+                }}
+              >
+                Entry Level (0–1 Year)
+              </Text>
+            </Pressable>
+          </View>
+
           {filteredJobs.length === 0 ? (
             <View className="mt-20 items-center justify-center">
               <Ionicons name="search-outline" size={48} color="#a3a3a3" />
