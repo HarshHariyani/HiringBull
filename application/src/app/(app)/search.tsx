@@ -1,14 +1,35 @@
+import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, Image, Linking } from 'react-native';
+import { Image, Linking, Pressable, type TextInput } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import {
+  Button,
+  ControlledInput,
+  ControlledSelect,
   FocusAwareStatusBar,
   SafeAreaView,
-  ScrollView,
   Text,
   View,
 } from '@/components/ui';
+import { useOutreachForm } from '@/lib/hooks/use-outreach-form';
+
+// Local component for this form with ref support
+const ControlledInputWithRef = React.forwardRef<
+  TextInput,
+  {
+    control: any;
+    name: string;
+    placeholder: string;
+    returnKeyType?: 'done' | 'next' | 'default';
+    onSubmitEditing?: () => void;
+    multiline?: boolean;
+    numberOfLines?: number;
+  }
+>(({ control, name, ...props }, ref) => {
+  return <ControlledInput control={control} name={name} {...props} ref={ref} />;
+});
 
 type Company = {
   id: string;
@@ -20,6 +41,57 @@ const COMPANIES: Company[] = [
   { id: '2', name: 'Meta' },
   { id: '3', name: 'Amazon' },
   { id: '4', name: 'Microsoft' },
+];
+
+const COMPANY_OPTIONS = [
+  { label: 'Adobe', value: 'adobe' },
+  { label: 'Amazon', value: 'amazon' },
+  { label: 'Apple', value: 'apple' },
+  { label: 'Atlassian', value: 'atlassian' },
+  { label: 'Google', value: 'google' },
+  { label: 'Meta', value: 'meta' },
+  { label: 'Microsoft', value: 'microsoft' },
+  { label: 'Oracle', value: 'oracle' },
+  { label: 'Salesforce', value: 'salesforce' },
+  { label: 'Samsung', value: 'samsung' },
+  { label: 'Uber', value: 'uber' },
+  { label: 'Walmart', value: 'walmart' },
+];
+
+const REASON_OPTIONS = [
+  { label: 'Seeking a Referral', value: 'seeking_a_referral' },
+  {
+    label: 'Resume Review / Profile Feedback',
+    value: 'resume_review_profile_feedback',
+  },
+  {
+    label: 'Preparing for an Upcoming Interview',
+    value: 'preparing_for_an_upcoming_interview',
+  },
+  {
+    label: 'Online Assessment (OA) Preparation Guidance',
+    value: 'online_assessment_oa_preparation_guidance',
+  },
+  {
+    label: 'Understanding the Hiring Process at This Company',
+    value: 'understanding_the_hiring_process_at_this_company',
+  },
+  {
+    label: 'Role Fit - Behavioral round prep',
+    value: 'role_fit_behavioral_round_prep',
+  },
+  {
+    label: 'Clarifying Job Requirements or Tech Stack',
+    value: 'clarifying_job_requirements_or_tech_stack',
+  },
+  {
+    label: 'Interview Experience & Preparation Tips',
+    value: 'interview_experience_preparation_tips',
+  },
+  {
+    label: 'Following Up After Applying',
+    value: 'following_up_after_applying',
+  },
 ];
 
 function DiscussionCard({ name }: { name: string }) {
@@ -41,6 +113,39 @@ function DiscussionCard({ name }: { name: string }) {
 }
 
 export default function Search() {
+  const { form, onSubmit } = useOutreachForm();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = form;
+  const { user } = useUser();
+
+  // Watch required fields for validation
+  const email = watch('email');
+  const company = watch('company');
+  const reason = watch('reason');
+  const message = watch('message');
+
+  // Check if all required fields are filled
+  const isFormValid = Boolean(
+    email?.trim() && company?.trim() && reason?.trim() && message?.trim()
+  );
+
+  const emailRef = React.useRef<TextInput>(null);
+  const jobIdRef = React.useRef<TextInput>(null);
+  const resumeLinkRef = React.useRef<TextInput>(null);
+  const messageRef = React.useRef<TextInput>(null);
+  const companyRef = React.useRef<{ present: () => void }>(null);
+  const reasonRef = React.useRef<{ present: () => void }>(null);
+
+  React.useEffect(() => {
+    if (user?.primaryEmailAddress?.emailAddress) {
+      form.setValue('email', user.primaryEmailAddress.emailAddress);
+    }
+  }, [user, form]);
+
   return (
     <SafeAreaView
       className="flex-1 bg-white dark:bg-neutral-950"
@@ -48,7 +153,7 @@ export default function Search() {
     >
       <FocusAwareStatusBar />
       <View className="flex-1 pt-6">
-        <View className="flex-row items-center justify-between px-5 pb-4 border-b border-neutral-200 shadow-sm bg-white dark:bg-neutral-950 dark:border-neutral-800">
+        <View className="flex-row items-center justify-between border-b border-neutral-200 bg-white px-5 pb-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
           <View className="mr-4 flex-1">
             <Text className="text-3xl font-black text-neutral-900 dark:text-white">
               Outreach
@@ -114,14 +219,16 @@ export default function Search() {
           </View>
         </View>
 
-        <ScrollView
-          className="flex-1"
+        <KeyboardAwareScrollView
+          alwaysBounceVertical={false}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingBottom: 20,
-            paddingTop: 10,
+            paddingHorizontal: 24,
+            paddingBottom: 24,
+            paddingTop: 16,
           }}
+          bottomOffset={20}
         >
           <View className="mb-3 flex-row gap-2">
             <Pressable
@@ -161,10 +268,88 @@ export default function Search() {
             </Pressable>
           </View>
 
+          <View className="mt-6">
+            <Text className="mb-4 text-xl font-bold text-neutral-900 dark:text-white">
+              Frame your Message
+            </Text>
+
+            <ControlledInputWithRef
+              placeholder="Enter your email"
+              control={control}
+              name="email"
+              ref={emailRef}
+              returnKeyType="next"
+              onSubmitEditing={() => companyRef.current?.present()}
+            />
+
+            <ControlledSelect
+              placeholder="Select company"
+              options={COMPANY_OPTIONS}
+              control={control}
+              name="company"
+              ref={companyRef}
+              onValueChange={() => reasonRef.current?.present()}
+              className="border-neutral-300 bg-neutral-100 px-4 py-3 dark:border-neutral-700"
+              inputValueClassName="text-neutral-400"
+              modalExtraHeight={0}
+              optionClassName="flex-row items-center border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800"
+              optionTextClassName="flex-1 text-neutral-900 dark:text-neutral-100"
+            />
+
+            <ControlledSelect
+              placeholder="Select reason for outreach"
+              options={REASON_OPTIONS}
+              control={control}
+              name="reason"
+              ref={reasonRef}
+              onValueChange={() => jobIdRef.current?.focus()}
+              className="border-neutral-300 bg-neutral-100 px-4 py-3 dark:border-neutral-700"
+              inputValueClassName="text-neutral-400"
+              modalExtraHeight={0}
+              optionClassName="flex-row items-center border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800"
+              optionTextClassName="flex-1 text-neutral-900 dark:text-neutral-100"
+            />
+
+            <ControlledInputWithRef
+              placeholder="Enter Job ID (Optional)"
+              control={control}
+              name="jobId"
+              ref={jobIdRef}
+              returnKeyType="next"
+              onSubmitEditing={() => resumeLinkRef.current?.focus()}
+            />
+
+            <ControlledInputWithRef
+              placeholder="Enter resume link (Optional)"
+              control={control}
+              name="resumeLink"
+              ref={resumeLinkRef}
+              returnKeyType="next"
+              onSubmitEditing={() => messageRef.current?.focus()}
+            />
+
+            <ControlledInputWithRef
+              placeholder="Enter a short message"
+              control={control}
+              name="message"
+              ref={messageRef}
+              multiline
+              numberOfLines={4}
+              returnKeyType="done"
+            />
+
+            <Button
+              label="Send message"
+              onPress={onSubmit}
+              className="mt-4"
+              disabled={!isFormValid}
+            />
+          </View>
+
           {/* {COMPANIES.map((company) => (
             <DiscussionCard key={company.id} name={company.name} />
           ))} */}
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
     </SafeAreaView>
   );

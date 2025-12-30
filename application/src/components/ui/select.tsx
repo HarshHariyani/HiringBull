@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 import {
   BottomSheetFlatList,
   type BottomSheetModal,
@@ -8,8 +7,7 @@ import { useColorScheme } from 'nativewind';
 import * as React from 'react';
 import type { FieldValues } from 'react-hook-form';
 import { useController } from 'react-hook-form';
-import { Platform, View } from 'react-native';
-import { Pressable, type PressableProps } from 'react-native';
+import { Platform, Pressable, type PressableProps, View } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import Svg, { Path } from 'react-native-svg';
 import { tv } from 'tailwind-variants';
@@ -18,8 +16,7 @@ import colors from '@/components/ui/colors';
 import { CaretDown } from '@/components/ui/icons';
 
 import type { InputControllerType } from './input';
-import { useModal } from './modal';
-import { Modal } from './modal';
+import { Modal, useModal } from './modal';
 import { Text } from './text';
 
 const selectTv = tv({
@@ -65,6 +62,9 @@ type OptionsProps = {
   onSelect: (option: OptionType) => void;
   value?: string | number;
   testID?: string;
+  modalExtraHeight?: number;
+  optionClassName?: string;
+  optionTextClassName?: string;
 };
 
 function keyExtractor(item: OptionType) {
@@ -72,9 +72,18 @@ function keyExtractor(item: OptionType) {
 }
 
 export const Options = React.forwardRef<BottomSheetModal, OptionsProps>(
-  ({ options, onSelect, value, testID }, ref) => {
-    const height = options.length * 70 + 100;
-    const snapPoints = React.useMemo(() => [height], [height]);
+  (
+    {
+      options,
+      onSelect,
+      value,
+      testID,
+      modalExtraHeight: _modalExtraHeight = 100,
+      optionClassName,
+      optionTextClassName,
+    },
+    ref
+  ) => {
     const { colorScheme } = useColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -86,16 +95,18 @@ export const Options = React.forwardRef<BottomSheetModal, OptionsProps>(
           selected={value === item.value}
           onPress={() => onSelect(item)}
           testID={testID ? `${testID}-item-${item.value}` : undefined}
+          className={optionClassName}
+          textClassName={optionTextClassName}
         />
       ),
-      [onSelect, value, testID]
+      [onSelect, value, testID, optionClassName, optionTextClassName]
     );
 
     return (
       <Modal
         ref={ref}
         index={0}
-        snapPoints={snapPoints}
+        // snapPoints={snapPoints}
         backgroundStyle={{
           backgroundColor: isDark ? colors.neutral[800] : colors.white,
         }}
@@ -106,6 +117,7 @@ export const Options = React.forwardRef<BottomSheetModal, OptionsProps>(
           renderItem={renderSelectItem}
           testID={testID ? `${testID}-modal` : undefined}
           estimatedItemSize={52}
+          contentContainerStyle={{ paddingBottom: 24 }}
         />
       </Modal>
     );
@@ -116,17 +128,23 @@ const Option = React.memo(
   ({
     label,
     selected = false,
+    className,
+    textClassName,
     ...props
   }: PressableProps & {
     selected?: boolean;
     label: string;
+    className?: string;
+    textClassName?: string;
   }) => {
+    const defaultClassName =
+      'flex-row items-center border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800';
+    const defaultTextClassName =
+      'flex-1 text-neutral-900 dark:text-neutral-100';
+
     return (
-      <Pressable
-        className="flex-row items-center border-b border-neutral-300 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
-        {...props}
-      >
-        <Text className="flex-1 dark:text-neutral-100 ">{label}</Text>
+      <Pressable className={className || defaultClassName} {...props}>
+        <Text className={textClassName || defaultTextClassName}>{label}</Text>
         {selected && <Check />}
       </Pressable>
     );
@@ -140,115 +158,155 @@ export interface SelectProps {
   error?: string;
   options?: OptionType[];
   onSelect?: (value: string | number) => void;
+  onValueChange?: (value: string | number) => void;
   placeholder?: string;
   testID?: string;
+  className?: string;
+  inputValueClassName?: string;
+  modalExtraHeight?: number;
+  optionClassName?: string;
+  optionTextClassName?: string;
 }
 interface ControlledSelectProps<T extends FieldValues>
   extends SelectProps,
     InputControllerType<T> {}
 
-export const Select = (props: SelectProps) => {
-  const {
-    label,
-    value,
-    error,
-    options = [],
-    placeholder = 'select...',
-    disabled = false,
-    onSelect,
-    testID,
-  } = props;
-  const modal = useModal();
+export const Select = React.forwardRef<{ present: () => void }, SelectProps>(
+  (props, ref) => {
+    const {
+      label,
+      value,
+      error,
+      options = [],
+      placeholder = 'select...',
+      disabled = false,
+      onSelect,
+      testID,
+      className,
+      inputValueClassName,
+      modalExtraHeight = 100,
+      optionClassName,
+      optionTextClassName,
+    } = props;
+    const modal = useModal();
 
-  const onSelectOption = React.useCallback(
-    (option: OptionType) => {
-      onSelect?.(option.value);
-      modal.dismiss();
-    },
-    [modal, onSelect]
-  );
+    const onSelectOption = React.useCallback(
+      (option: OptionType) => {
+        onSelect?.(option.value);
+        modal.dismiss();
+      },
+      [modal, onSelect]
+    );
 
-  const styles = React.useMemo(
-    () =>
-      selectTv({
-        error: Boolean(error),
-        disabled,
-      }),
-    [error, disabled]
-  );
+    const styles = React.useMemo(
+      () =>
+        selectTv({
+          error: Boolean(error),
+          disabled,
+        }),
+      [error, disabled]
+    );
 
-  const textValue = React.useMemo(
-    () =>
-      value !== undefined
-        ? (options?.filter((t) => t.value === value)?.[0]?.label ?? placeholder)
-        : placeholder,
-    [value, options, placeholder]
-  );
+    const textValue = React.useMemo(
+      () =>
+        value !== undefined
+          ? (options?.filter((t) => t.value === value)?.[0]?.label ??
+            placeholder)
+          : placeholder,
+      [value, options, placeholder]
+    );
 
-  return (
-    <>
-      <View className={styles.container()}>
-        {label && (
-          <Text
-            testID={testID ? `${testID}-label` : undefined}
-            className={styles.label()}
+    React.useImperativeHandle(ref, () => ({ present: modal.present }), [modal]);
+
+    return (
+      <>
+        <View className={styles.container()}>
+          {label && (
+            <Text
+              testID={testID ? `${testID}-label` : undefined}
+              className={styles.label()}
+            >
+              {label}
+            </Text>
+          )}
+          <Pressable
+            className={`${styles.input()} ${className || ''}`}
+            disabled={disabled}
+            onPress={modal.present}
+            testID={testID ? `${testID}-trigger` : undefined}
           >
-            {label}
-          </Text>
-        )}
-        <Pressable
-          className={styles.input()}
-          disabled={disabled}
-          onPress={modal.present}
-          testID={testID ? `${testID}-trigger` : undefined}
-        >
-          <View className="flex-1">
-            <Text className={styles.inputValue()}>{textValue}</Text>
-          </View>
-          <CaretDown />
-        </Pressable>
-        {error && (
-          <Text
-            testID={`${testID}-error`}
-            className="text-sm text-danger-300 dark:text-danger-600"
-          >
-            {error}
-          </Text>
-        )}
-      </View>
-      <Options
-        testID={testID}
-        ref={modal.ref}
-        options={options}
-        onSelect={onSelectOption}
-      />
-    </>
-  );
-};
+            <View className="flex-1">
+              <Text
+                className={
+                  textValue === placeholder
+                    ? `${styles.inputValue()} ${inputValueClassName || ''}`
+                    : styles.inputValue()
+                }
+              >
+                {textValue}
+              </Text>
+            </View>
+            <CaretDown />
+          </Pressable>
+          {error && (
+            <Text
+              testID={`${testID}-error`}
+              className="text-sm text-danger-300 dark:text-danger-600"
+            >
+              {error}
+            </Text>
+          )}
+        </View>
+        <Options
+          testID={testID}
+          ref={modal.ref}
+          options={options}
+          onSelect={onSelectOption}
+          modalExtraHeight={modalExtraHeight}
+          optionClassName={optionClassName}
+          optionTextClassName={optionTextClassName}
+        />
+      </>
+    );
+  }
+);
 
 // only used with react-hook-form
-export function ControlledSelect<T extends FieldValues>(
-  props: ControlledSelectProps<T>
-) {
-  const { name, control, rules, onSelect: onNSelect, ...selectProps } = props;
-
-  const { field, fieldState } = useController({ control, name, rules });
-  const onSelect = React.useCallback(
-    (value: string | number) => {
-      field.onChange(value);
-      onNSelect?.(value);
+export const ControlledSelect = React.forwardRef<
+  { present: () => void },
+  ControlledSelectProps<any>
+>(
+  (
+    {
+      name,
+      control,
+      rules,
+      onSelect: onNSelect,
+      onValueChange,
+      ...selectProps
     },
-    [field, onNSelect]
-  );
-  return (
-    <Select
-      onSelect={onSelect}
-      value={field.value}
-      error={fieldState.error?.message}
-      {...selectProps}
-    />
-  );
-}
+    ref
+  ) => {
+    const { field, fieldState } = useController({ control, name, rules });
+    const onSelect = React.useCallback(
+      (value: string | number) => {
+        field.onChange(value);
+        onNSelect?.(value);
+        onValueChange?.(value);
+      },
+      [field, onNSelect, onValueChange]
+    );
+    return (
+      <Select
+        ref={ref}
+        onSelect={onSelect}
+        value={field.value}
+        error={fieldState.error?.message}
+        {...selectProps}
+      />
+    );
+  }
+);
 
 const Check = ({ ...props }: SvgProps) => (
   <Svg

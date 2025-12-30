@@ -67,7 +67,7 @@ const button = tv({
     },
     disabled: {
       true: {
-        container: 'bg-neutral-200 dark:bg-neutral-700',
+        container: 'bg-neutral-200 dark:bg-neutral-800 opacity-60',
         label: 'text-neutral-400 dark:text-neutral-500',
         indicator: 'text-neutral-400 dark:text-neutral-500',
       },
