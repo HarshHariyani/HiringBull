@@ -7,8 +7,12 @@ import type {
 } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import type { TextInputProps } from 'react-native';
-import { I18nManager, StyleSheet, View } from 'react-native';
-import { TextInput as NTextInput } from 'react-native';
+import {
+  I18nManager,
+  StyleSheet,
+  TextInput as NTextInput,
+  View,
+} from 'react-native';
 import { tv } from 'tailwind-variants';
 
 import colors from './colors';
@@ -16,7 +20,7 @@ import { Text } from './text';
 
 const inputTv = tv({
   slots: {
-    container: 'mb-2',
+    container: 'mb-4',
     label: 'text-grey-100 mb-1 text-lg dark:text-neutral-100',
     input:
       'mt-0 rounded-xl border-[0.5px] border-neutral-300 bg-neutral-100 px-4 py-3 font-inter text-base  font-medium leading-5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white',
@@ -124,15 +128,41 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
 });
 
 // only used with react-hook-form
-export function ControlledInput<T extends FieldValues>(
-  props: ControlledInputProps<T>
+export const ControlledInput = React.forwardRef<
+  NTextInput,
+  ControlledInputProps<any>
+>(function ControlledInput<T extends FieldValues>(
+  props: ControlledInputProps<T>,
+  ref: React.Ref<NTextInput>
 ) {
   const { name, control, rules, ...inputProps } = props;
 
   const { field, fieldState } = useController({ control, name, rules });
+
+  // Merge refs: react-hook-form's field.ref and external ref
+  const mergedRef = React.useCallback(
+    (node: NTextInput | null) => {
+      // Set react-hook-form's ref
+      if (typeof field.ref === 'function') {
+        field.ref(node);
+      } else if (field.ref) {
+        // eslint-disable-next-line react-compiler/react-compiler
+        (field.ref as React.RefObject<NTextInput | null>).current = node;
+      }
+
+      // Set external ref
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        (ref as React.RefObject<NTextInput | null>).current = node;
+      }
+    },
+    [field.ref, ref]
+  );
+
   return (
     <Input
-      ref={field.ref}
+      ref={mergedRef}
       autoCapitalize="none"
       onChangeText={field.onChange}
       value={(field.value as string) || ''}
@@ -140,4 +170,4 @@ export function ControlledInput<T extends FieldValues>(
       error={fieldState.error?.message}
     />
   );
-}
+});
